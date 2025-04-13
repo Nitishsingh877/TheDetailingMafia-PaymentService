@@ -1,7 +1,5 @@
 package com.thederailingmafia.carwash.paymentservice.filter;
 
-
-
 import com.thederailingmafia.carwash.paymentservice.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,6 +18,7 @@ import java.io.IOException;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
+
     @Autowired
     private JwtUtil jwtUtil;
 
@@ -27,7 +26,19 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private UserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+        // Handle OPTIONS requests for CORS preflight
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            System.out.println("Handling OPTIONS request for CORS preflight");
+            response.setHeader("Access-Control-Allow-Origin", "http://localhost:8000");
+            response.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+            response.setHeader("Access-Control-Allow-Headers", "Authorization,Content-Type,X-User-Email");
+            response.setHeader("Access-Control-Max-Age", "3600");
+            response.setStatus(HttpServletResponse.SC_OK);
+            return;
+        }
+
         String authHeader = request.getHeader("Authorization");
         System.out.println("Raw Authorization header: " + authHeader);
 
@@ -53,7 +64,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
             if (userDetails != null && jwtUtil.validateToken(jwtToken, email)) {
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        email, null, userDetails.getAuthorities()
+                        userDetails, null, userDetails.getAuthorities()
                 );
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
