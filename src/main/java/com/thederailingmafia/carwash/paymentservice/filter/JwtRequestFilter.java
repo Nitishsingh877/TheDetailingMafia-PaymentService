@@ -28,16 +28,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        // Handle OPTIONS requests for CORS preflight
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-            System.out.println("Handling OPTIONS request for CORS preflight");
-            response.setHeader("Access-Control-Allow-Origin", "http://localhost:8000");
-            response.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-            response.setHeader("Access-Control-Allow-Headers", "Authorization,Content-Type,X-User-Email");
-            response.setHeader("Access-Control-Max-Age", "3600");
-            response.setStatus(HttpServletResponse.SC_OK);
-            return;
-        }
+
 
         String authHeader = request.getHeader("Authorization");
         System.out.println("Raw Authorization header: " + authHeader);
